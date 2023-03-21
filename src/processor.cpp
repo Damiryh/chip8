@@ -1,11 +1,13 @@
 #include "processor.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 using namespace ch8;
 
-Processor::Processor(Mapper &mapper, Screen &screen):
+Processor::Processor(Mapper &mapper, Screen &screen, Keyboard &keyboard):
 	m_mapper(mapper),
-	m_screen(screen) {
+	m_screen(screen),
+	m_keyboard(keyboard) {
 	for (int i = 0; i < 0x10; i++) V[i] = 0;
 	PC = 0x200; SP = 0x000; I = 0x000;
 	ST = 0x00; DT = 0x00;
@@ -15,99 +17,121 @@ void Processor::tick() {
 	word op = read();
 	int alu = 0;
 	
-	if (op & 0xffff == 0x00e0) { /* clear screen */ } else
-	if (op & 0xffff == 0x00ee) { PC = stk[SP]; SP--; } else
-	if (op & 0xf000 == 0x1000) { PC = nnn(op); } else
-	if (op & 0xf000 == 0x2000) { SP++; stk[SP] = PC; PC = nnn(op); } else
-	if (op & 0xf000 == 0x3000) { if (V[x(op)] == kk(op)) read(); } else
-	if (op & 0xf000 == 0x4000) { if (V[x(op)] != kk(op)) read(); } else
-	if (op & 0xf00f == 0x5000) { if (V[x(op)] == V[x(op)]) read(); } else
-	if (op & 0xf000 == 0x6000) { V[x(op)] = kk(op); } else
-	if (op & 0xf000 == 0x7000) { V[x(op)] += kk(op); } else
-	if (op & 0xf00f == 0x8000) { V[x(op)] = V[y(op)]; } else
-	if (op & 0xf00f == 0x8001) { V[x(op)] |= V[y(op)]; } else
-	if (op & 0xf00f == 0x8002) { V[x(op)] &= V[y(op)]; } else
-	if (op & 0xf00f == 0x8003) { V[x(op)] ^= V[y(op)]; } else
-	if (op & 0xf00f == 0x8004) {
+	//printf("%04x %04x\n", PC-2, op);
+	
+	if ((op & 0xffff) == 0x00e0) { m_screen.clear(); } else
+	if ((op & 0xffff) == 0x00ee) { PC = stk[SP]; SP--; } else
+	if ((op & 0xf000) == 0x1000) { PC = nnn(op); } else
+	if ((op & 0xf000) == 0x2000) { SP++; stk[SP] = PC; PC = nnn(op); } else
+	if ((op & 0xf000) == 0x3000) { if (V[x(op)] == kk(op)) read(); } else
+	if ((op & 0xf000) == 0x4000) { if (V[x(op)] != kk(op)) read(); } else
+	if ((op & 0xf00f) == 0x5000) { if (V[x(op)] == V[x(op)]) read(); } else
+	if ((op & 0xf000) == 0x6000) { V[x(op)] = kk(op); } else
+	if ((op & 0xf000) == 0x7000) { V[x(op)] += kk(op); } else
+	if ((op & 0xf00f) == 0x8000) { V[x(op)] = V[y(op)]; } else
+	if ((op & 0xf00f) == 0x8001) { V[x(op)] |= V[y(op)]; } else
+	if ((op & 0xf00f) == 0x8002) { V[x(op)] &= V[y(op)]; } else
+	if ((op & 0xf00f) == 0x8003) { V[x(op)] ^= V[y(op)]; } else
+	if ((op & 0xf00f) == 0x8004) {
 		alu = V[x(op)] + V[y(op)];
 		V[0x0f] = (alu > 0xff); // carry
 		V[x(op)] = alu & 0xff;
 	} else
-	if (op & 0xf00f == 0x8005) {
+	if ((op & 0xf00f) == 0x8005) {
 		alu = V[x(op)] - V[y(op)];
 		V[0x0f] = (alu < 0x00); // borrow
 		V[x(op)] = alu & 0xff;
 	} else
-	if (op & 0xf00f == 0x8006) {
-		V[0x0f] = V[x(op)] & 0x01;
+	if ((op & 0xf00f) == 0x8006) {
+		V[0x0f] = V[x(op)] & 0x01; // shift right
 		V[x(op)] = V[x(op)] >> 1;
 	} else 
-	if (op & 0xf00f == 0x8007) {
+	if ((op & 0xf00f) == 0x8007) {
 		alu = V[y(op)] - V[x(op)];
 		V[0x0f] = !(alu < 0x00); // borrow
 		V[x(op)] = alu & 0xff;
 	} else 
-	if (op & 0xf00f == 0x800e) {
-		V[0x0f] = V[x(op)] & 0x80;
+	if ((op & 0xf00f) == 0x800e) {
+		V[0x0f] = V[x(op)] & 0x80; // shift left
 		V[x(op)] = V[x(op)] << 1;
 	} else 
-	if (op & 0xf00f == 0x9000) {
+	if ((op & 0xf00f) == 0x9000) {
 		if (V[x(op)] != V[y(op)]) read();
 	} else 
-	if (op & 0xf000 == 0xa000) {
+	if ((op & 0xf000) == 0xa000) {
 		I = nnn(op);
 	} else 
-	if (op & 0xf000 == 0xb000) {
+	if ((op & 0xf000) == 0xb000) {
 		PC = nnn(op) + V[0];
 	} else 
-	if (op & 0xf000 == 0xc000) {
+	if ((op & 0xf000) == 0xc000) {
 		V[x(op)] = (rand() % 256) & kk(op);
 	} else 
-	if (op & 0xf000 == 0xd000) {
-		/* Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision. 
+	if ((op & 0xf000) == 0xd000) {
+		byte size = n(op);
+		byte x_pos = V[x(op)];
+		byte y_pos = V[y(op)];
 		
-		The interpreter reads n bytes from memory, starting at the address stored in I. These bytes are then displayed as sprites on screen at coordinates (Vx, Vy). Sprites are XORed onto the existing screen. If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0. If the sprite is positioned so part of it is outside the coordinates of the display, it wraps around to the opposite side of the screen. See instruction 8xy3 for more information on XOR, and section 2.4, Display, for more information on the Chip-8 screen and sprites. */
+		for (byte i = 0; i < size; i++) {
+			m_screen.drawLine(x_pos, (y_pos + i) % 32, m_mapper.peek((I + i) & 0xfff));
+		}
 	} else 
-	if (op & 0xf0ff == 0xe09e) {
-		/* Skip next instruction if key with the value of Vx is pressed.
-
-		Checks the keyboard, and if the key corresponding to the value of Vx is currently in the down position, PC is increased by 2. */
+	if ((op & 0xf0ff) == 0xe09e) {
+		if (m_keyboard.getKeyState(V[x(op)])) read();
 	} else 
-	if (op & 0xf0ff == 0xe0a1) {
-		/* Skip next instruction if key with the value of Vx is not pressed.
-
-		Checks the keyboard, and if the key corresponding to the value of Vx is currently in the up position, PC is increased by 2. */
+	if ((op & 0xf0ff) == 0xe0a1) {
+		if (!m_keyboard.getKeyState(V[x(op)])) read();
 	} else 
-	if (op & 0xf0ff == 0xf007) {
+	if ((op & 0xf0ff) == 0xf007) {
 		V[x(op)] = DT;
 	} else 
-	if (op & 0xf0ff == 0xf00a) {
-		/* Wait for a key press, store the value of the key in Vx.
-
-		All execution stops until a key is pressed, then the value of that key is stored in Vx. */
+	if ((op & 0xf0ff) == 0xf00a) {
+		int pressed = -1;
+		
+		for (byte i = 0; i < 0x0f; i++) {
+			if (m_keyboard.getKeyState(i)) pressed = i;
+		}
+		
+		if (pressed < 0) PC  = (PC - 2) & 0xfff; else V[x(op)] = pressed & 0x0f;
 	} else 
-	if (op & 0xf0ff == 0xf015) {
+	if ((op & 0xf0ff) == 0xf015) {
 		DT = V[x(op)];
 	} else 
-	if (op & 0xf0ff == 0xf018) {
+	if ((op & 0xf0ff) == 0xf018) {
 		ST = V[x(op)];
 	} else 
-	if (op & 0xf0ff == 0xf01e) {
+	if ((op & 0xf0ff) == 0xf01e) {
 		I += V[x(op)];
 	} else 
-	if (op & 0xf0ff == 0xf029) {
-		/* Set I = location of sprite for digit Vx. */
+	if ((op & 0xf0ff) == 0xf029) {
+		I = (V[x(op)] & 0xf) * 5; // for 8x5 font
 	} else 
-	if (op & 0xf0ff == 0xf033) {
-		/* Store BCD representation of Vx in memory locations I, I+1, and I+2. */
+	if ((op & 0xf0ff) == 0xf033) {
+		/* BCD representation */
+		m_mapper.put(I, V[x(op)] / 100);
+		m_mapper.put(I + 1, (V[x(op)] / 10) % 10);
+		m_mapper.put(I + 2, V[x(op)] % 10);
 	} else 
-	if (op & 0xf0ff == 0xf055) {
+	if ((op & 0xf0ff) == 0xf055) {
 		for (int i = 0; i < 0x10; i++) m_mapper.put((I+i) & 0xfff, V[i]);
 	} else 
-	if (op & 0xf0ff == 0xf065) {
+	if ((op & 0xf0ff) == 0xf065) {
 		for (int i = 0; i < 0x10; i++) V[i] = m_mapper.peek((I+i) & 0xfff);
 	}
 }
+
+void Processor::decDT() {
+	if (DT == 0) return; DT--;
+}
+
+void Processor::decST() {
+	if (ST == 0) return; ST--;
+}
+
+bool Processor::beep() {
+	return (ST != 0);
+}
+
 
 word Processor::read() {
 	word result = (m_mapper.peek(PC) << 8) | m_mapper.peek(PC + 1);

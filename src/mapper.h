@@ -9,6 +9,8 @@ namespace ch8 {
 		Mapper();
 		
 		bool load(std::string filename);
+		bool loadRom(std::string filename);
+		bool loadProg(std::string filename);
 		
 		byte peek(word address);
 		void put(word address, byte value);

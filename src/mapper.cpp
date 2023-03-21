@@ -9,6 +9,23 @@ bool Mapper::load(std::string filename) {
 	std::ifstream file(filename.c_str(), std::ios::binary);
 	if (!file.is_open()) return false;
 	file.read((char*)m_space, 0x1000);
+	file.close();
+	return true;
+}
+
+bool Mapper::loadRom(std::string filename) {
+	std::ifstream file(filename.c_str(), std::ios::binary);
+	if (!file.is_open()) return false;
+	file.read((char*)m_space, 0x200);
+	file.close();
+	return true;
+}
+
+bool Mapper::loadProg(std::string filename) {
+	std::ifstream file(filename.c_str(), std::ios::binary);
+	if (!file.is_open()) return false;
+	file.read((char*)m_space + 0x200, 0x1000 - 0x200);
+	file.close();
 	return true;
 }
 

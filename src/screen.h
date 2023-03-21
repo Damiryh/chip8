@@ -9,8 +9,13 @@ namespace ch8 {
 	public:
 		Screen(sf::RenderWindow &target);
 		
+		void clear();
+		
 		void put(byte x, byte y, bool state);
 		bool peek(byte x, byte y);
+		
+		bool drawLine(byte x, byte y, byte line);
+		
 		void draw();
 		
 	private:

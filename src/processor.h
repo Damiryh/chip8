@@ -1,12 +1,18 @@
 #pragma once
 #include "mapper.h"
 #include "screen.h"
+#include "keyboard.h"
 
 namespace ch8 {
 	class Processor {
 	public:
-		Processor(Mapper &mapper, Screen &screen);
+		Processor(Mapper &mapper, Screen &screen, Keyboard &keyboard);
 		void tick();
+		
+		void decDT();
+		void decST();
+		
+		bool beep();
 		
 	private:
 		byte V[0x10]; // General purpose registers
@@ -15,8 +21,9 @@ namespace ch8 {
 		
 		word stk[0x10]; // Subroutine stack
 		
-		Mapper &m_mapper;
-		Screen &m_screen;
+		Mapper     &m_mapper;
+		Screen     &m_screen;
+		Keyboard &m_keyboard;
 		
 		word read();
 		

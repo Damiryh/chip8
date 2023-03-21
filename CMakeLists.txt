@@ -4,6 +4,7 @@ project(chip8 LANGUAGES CXX VERSION 1.0)
 add_executable(chip8
 	"src/mapper.cpp"
 	"src/screen.cpp"
+	"src/keyboard.cpp"
 	"src/processor.cpp"
 	"src/main.cpp")
 
@@ -24,3 +25,8 @@ add_custom_command(TARGET chip8 POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
 	"${PROJECT_SOURCE_DIR}/share"
 	$<TARGET_FILE_DIR:chip8>)
+
+add_custom_command(TARGET chip8 POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
+	"${PROJECT_SOURCE_DIR}/resources"
+	$<TARGET_FILE_DIR:chip8>/resources)
