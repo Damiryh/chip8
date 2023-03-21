@@ -32,6 +32,11 @@ std::map<sf::Keyboard::Key, ch8::byte> key_map {
 };
 
 int main(int argc, char **argv) {
+	if (argc < 2) {
+		printf("%s\n", "Usage: chip8 [options] <file>");
+		return 1;
+	}
+	
 	sf::RenderWindow window(sf::VideoMode(640, 320), "chip-8");
 	sf::Event event;
 	sf::Clock clk;
@@ -48,7 +53,7 @@ int main(int argc, char **argv) {
 	
 	if (!sound_buffer.loadFromFile("resources/square_sample.wav")) { return 1; }
 	if (!mapper.loadRom("resources/font.rom")) { return 1; }
-	if (!mapper.loadProg("resources/morse_demo.ch8")) { return 1; }
+	if (!mapper.loadProg(argv[argc-1])) { return 1; }
 	
 	beeper.setBuffer(sound_buffer);
 	beeper.setLoop(true);

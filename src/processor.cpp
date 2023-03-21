@@ -73,7 +73,7 @@ void Processor::tick() {
 		byte y_pos = V[y(op)];
 		
 		for (byte i = 0; i < size; i++) {
-			m_screen.drawLine(x_pos, (y_pos + i) % 32, m_mapper.peek((I + i) & 0xfff));
+			V[0xf] = m_screen.drawLine(x_pos, (y_pos + i) % 32, m_mapper.peek((I + i) & 0xfff));
 		}
 	} else 
 	if ((op & 0xf0ff) == 0xe09e) {
