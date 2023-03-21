@@ -8,11 +8,16 @@ Processor::Processor(Mapper &mapper, Screen &screen, Keyboard &keyboard):
 	m_mapper(mapper),
 	m_screen(screen),
 	m_keyboard(keyboard) {
+	reset();
+}
+
+void Processor::reset() {
 	for (int i = 0; i < 0x10; i++) V[i] = 0;
 	PC = 0x200; SP = 0x000; I = 0x000;
 	ST = 0x00; DT = 0x00;
 }
 
+// Руками сюда лучше не лезть))
 void Processor::tick() {
 	word op = read();
 	int alu = 0;
@@ -111,7 +116,7 @@ void Processor::tick() {
 		I = (V[x(op)] & 0xf) * 5; // for 8x5 font
 	} else 
 	if ((op & 0xf0ff) == 0xf033) {
-		/* BCD representation */
+		/* Сохраняем число в BCD представление */
 		m_mapper.put(I, V[x(op)] / 100);
 		m_mapper.put(I + 1, (V[x(op)] / 10) % 10);
 		m_mapper.put(I + 2, V[x(op)] % 10);

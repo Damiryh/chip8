@@ -7,28 +7,27 @@ namespace ch8 {
 	class Processor {
 	public:
 		Processor(Mapper &mapper, Screen &screen, Keyboard &keyboard);
-		void tick();
-		
-		void decDT();
-		void decST();
-		
-		bool beep();
+		void reset();  // Сброс всех регистров
+		void tick();   // Выполнение одной инструкции
+		void decDT();  // Декремент таймеров из основного цикла
+		void decST();  // Согласно таймингам (60 раз в секунду)
+		bool beep();   // Управление генератором звука
 		
 	private:
-		byte V[0x10]; // General purpose registers
-		word PC, SP, I; // Program, stack, address registers
-		byte ST, DT; // Sound & Delay timer registers
+		byte V[0x10]; // Основные регистры
+		word PC, SP, I; // Регистры инструкции, стека, адреса
+		byte ST, DT; // Таймеры звука и задержки
 		
-		word stk[0x10]; // Subroutine stack
+		word stk[0x10]; // Стек вызовов
 		
-		Mapper     &m_mapper;
-		Screen     &m_screen;
-		Keyboard &m_keyboard;
+		Mapper     &m_mapper; // Доступ к периферии и памяти - по ссылкам:
+		Screen     &m_screen; // К экрану 
+		Keyboard &m_keyboard; // И к клавиатуре
 		
-		word read();
+		word read();		  // Чтение слова из памяти
 		
-		word nnn(word opcode);
-		byte   n(word opcode);
+		word nnn(word opcode);  // Доступ к операндам инструкции - через
+		byte   n(word opcode);  // Вспомогательные функции
 		byte   x(word opcode);
 		byte   y(word opcode);
 		byte  kk(word opcode);
