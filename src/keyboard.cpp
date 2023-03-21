@@ -19,6 +19,10 @@ void Keyboard::release(sf::Keyboard::Key key) {
 	}
 }
 
+void Keyboard::release(byte code) {
+	m_keys[code & 0x0f] = false;
+}
+
 bool Keyboard::getKeyState(byte code) {
 	return (code < 0x10) && m_keys[code];
 }

@@ -92,7 +92,11 @@ void Processor::tick() {
 			if (m_keyboard.getKeyState(i)) pressed = i;
 		}
 		
-		if (pressed < 0) PC  = (PC - 2) & 0xfff; else V[x(op)] = pressed & 0x0f;
+		if (pressed < 0) { PC = (PC - 2) & 0xfff; }
+		else {
+			V[x(op)] = pressed & 0x0f;
+			m_keyboard.release(pressed);
+		}
 	} else 
 	if ((op & 0xf0ff) == 0xf015) {
 		DT = V[x(op)];

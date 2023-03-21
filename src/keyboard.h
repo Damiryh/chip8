@@ -10,7 +10,7 @@ namespace ch8 {
 		
 		void press(sf::Keyboard::Key key);
 		void release(sf::Keyboard::Key key);
-		
+		void release(byte code);
 		bool getKeyState(byte code);
 		
 	private:

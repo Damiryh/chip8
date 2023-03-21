@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
 	sf::Sound beeper;
 	
 	float ft = 0.f, tt = 0.f, pt = 0.f;
-	float tps = 60.f, fps = 30.f, pps = 10000.f;
+	float tps = 60.f, fps = 30.f, pps = 1000.f;
 	
 	ch8::Mapper mapper;
 	ch8::Screen screen(window);
