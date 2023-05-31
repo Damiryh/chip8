@@ -2,11 +2,15 @@ cmake_minimum_required(VERSION 3.21)
 project(chip8 LANGUAGES CXX VERSION 1.0)
 
 add_executable(chip8
-	"src/mapper.cpp"
-	"src/screen.cpp"
-	"src/keyboard.cpp"
-	"src/processor.cpp"
-	"src/main.cpp")
+	"emulator/mapper.cpp"
+	"emulator/screen.cpp"
+	"emulator/keyboard.cpp"
+	"emulator/processor.cpp"
+	"emulator/main.cpp")
+
+add_executable(chip8disasm
+	"disasm/main.cpp"
+)
 
 target_include_directories(chip8
 	PUBLIC "include/"
